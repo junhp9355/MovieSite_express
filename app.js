@@ -140,9 +140,13 @@ app.patch('/todos/:id', async (req, res) => {
     [perform_date, text, id]
   )
 
-  res.json({
-    msg: `${id}번 할일이 수정되었습니다.`,
-  })
+  const [newRows] = await pool.query(
+    `
+    SELECT *
+    FROM todo ORDER BY id DESC
+    `
+  ) 
+  res.json(newRows)
 })
 
 app.patch('/todos/abc/:id', async (req, res) => {
