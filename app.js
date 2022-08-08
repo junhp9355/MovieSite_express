@@ -149,6 +149,46 @@ app.patch('/todos/:id', async (req, res) => {
   res.json(newRows)
 })
 
+/// Drag & Drop
+app.patch('/todos/swap/:id', async (req, res) => {
+  const { id } = req.params;
+  const { targetId } = req.body;
+  if (!id) {
+    res.status(400).json({
+      msg: "id required"
+    });
+    return;
+  }
+  if (!targetId) {
+    res.status(400).json({
+      msg: "id targetId"
+    }); 
+    return;
+  }
+
+  await pool.query(
+    `
+    UPDATE todo a
+    INNER JOIN todo b ON a.id != b.id
+    SET a.reg_date = b.reg_date,
+    a.perform_date = b.perform_date,
+    a.checked = b.checked,
+    a.text = b.text
+    WHERE a.id IN (? , ?) AND b.id IN (? , ?)
+    `,
+    [targetId, id, id, targetId]
+  );
+  const [newRows] = await pool.query(
+    `
+    SELECT *
+    FROM todo ORDER BY id DESC
+    `
+  );
+  res.json(newRows);
+});
+
+
+///
 /// 체크하기
 app.patch('/todos/abc/:id', async (req, res) => {
   const { id } = req.params
