@@ -1,4 +1,3 @@
-// app.js
 import express from 'express'
 import mysql from 'mysql2/promise'
 import cors from 'cors'
@@ -64,15 +63,15 @@ app.post('/todos', async (req, res) => {
   ORDER BY id
   DESC LIMIT 1
   `)
-  /// 새로운 데이터 변수를 선언하고 모든 데이터를 반환하는 코드 /// >>> 프론트에서 코드가 단순해짐11!
+  /// 새로운 데이터 변수를 선언하고 모든 데이터를 반환하는 코드 /// >>> 프론트에서 코드가 단순해짐!
   const [newRows] = await pool.query(
     `
     SELECT *
     FROM todo ORDER BY id DESC
     `
   ) 
-  //////
   res.json(newRows)
+  ///
 })
 
 app.get('/todos/:id/', async (req, res) => {
@@ -97,6 +96,7 @@ app.get('/todos/:id/', async (req, res) => {
   res.json(rows[0])
 })
 
+/// 수정하기
 app.patch('/todos/:id', async (req, res) => {
   const { id } = req.params
   const { perform_date, text } = req.body
@@ -149,6 +149,7 @@ app.patch('/todos/:id', async (req, res) => {
   res.json(newRows)
 })
 
+/// 체크하기
 app.patch('/todos/abc/:id', async (req, res) => {
   const { id } = req.params
   const [[rows]] = await pool.query(
@@ -174,17 +175,19 @@ app.patch('/todos/abc/:id', async (req, res) => {
 
     [!rows.checked, id]
   )
-  /// 새로운 데이터 변수를 선언하고 모든 데이터를 반환하는 코드 /// >>> 프론트에서 코드가 단순해짐
+  ///
   const [newRows] = await pool.query(
     `
     SELECT *
     FROM todo ORDER BY id DESC
     `
   ) 
-  //////
   res.json(newRows)
+  ///
 })
 
+
+/// 삭제하기
 app.delete('/todos/:id', async (req, res) => {
   const { id } = req.params
 
@@ -209,15 +212,15 @@ app.delete('/todos/:id', async (req, res) => {
     [id]
   )
 
-    /// 새로운 데이터 변수를 선언하고 모든 데이터를 반환하는 코드 /// >>> 프론트에서 코드가 단순해짐
+    ///
   const [newRows] = await pool.query(
     `
     SELECT *
     FROM todo ORDER BY id DESC
     `
   ) 
-  //////
   res.json(newRows)
+  ///
 })
 
 app.listen(port, () => {
