@@ -44,26 +44,27 @@ app.get('/todos', async (req, res) => {
 })
 
 app.post('/todos', async (req, res) => {
-  const {
-    body: { text },
-  } = req
+  const { text } = req.body
+  // const {
+  //   body: { text },
+  // } = req
   await pool.query(
     `
   INSERT INTO todo
   SET reg_date = NOW(),
-  perform_date = '2022-05-18 07:00:00',
+  perform_date = '2022-10-18 07:00:00',
   checked = 0,
   text = ?;
   `,
     [text]
   )
-  const [[rows]] = await pool.query(`
-  SELECT *
-  FROM todo
-  ORDER BY id
-  DESC LIMIT 1
-  `)
-  /// 새로운 데이터 변수를 선언하고 모든 데이터를 반환하는 코드 /// >>> 프론트에서 코드가 단순해짐!
+  // const [[rows]] = await pool.query(`
+  // SELECT *
+  // FROM todo
+  // ORDER BY id
+  // DESC LIMIT 1
+  // `)
+  /// 
   const [newRows] = await pool.query(
     `
     SELECT *
@@ -168,15 +169,14 @@ app.patch('/todos/swap/:id', async (req, res) => {
 
   await pool.query(
     `
-    UPDATE todo a
-    INNER JOIN todo b ON a.id != b.id
+    UPDATE todo a INNER JOIN todo b ON a.id != b.id
     SET a.reg_date = b.reg_date,
     a.perform_date = b.perform_date,
     a.checked = b.checked,
     a.text = b.text
     WHERE a.id IN (? , ?) AND b.id IN (? , ?)
     `,
-    [targetId, id, id, targetId]
+    [targetId, id, targetId, id]
   );
   const [newRows] = await pool.query(
     `
@@ -246,7 +246,7 @@ app.delete('/todos/:id', async (req, res) => {
     return
   }
 
-  const [rs] = await pool.query(
+  await pool.query(
     `DELETE FROM todo
     WHERE id = ?`,
     [id]
