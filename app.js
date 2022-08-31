@@ -1,268 +1,262 @@
-import express from 'express'
-import mysql from 'mysql2/promise'
-import cors from 'cors'
-import axios from 'axios'
+import express from "express";
+import mysql from "mysql2/promise";
+import cors from "cors";
+import axios from "axios";
 
-const app = express()
+const app = express();
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
-const port = 4000
+const port = 4000;
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'sbsst',
-  password: 'sbs123414',
-  database: 'a9',
+  host: "localhost",
+  user: "sbsst",
+  password: "sbs123414",
+  database: "kakaobank",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-})
+});
 
 const getData = async () => {
-  const data = await axios.get('http://localhost:3000/todos')
-}
+  const data = await axios.get("http://localhost:3000/kakaobank");
+};
 
-app.get('/todos/:id/:contentId', async (req, res) => {
+app.get("/kakaobank/:id/:contentId", async (req, res) => {
   // params 여러개 받기
   const data = {
-    todos: {
+    kakaobank: {
       id: req.params.id,
       contentId: req.params.contentId,
     },
-  }
+  };
 
   const {
-    todos: { id, contentId },
-  } = data
-})
+    kakaobank: { id, contentId },
+  } = data;
+});
 
-app.get('/todos', async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM todo ORDER BY id DESC')
+app.get("/kakaobank", async (req, res) => {
+  const [rows] = await pool.query("SELECT * FROM article ORDER BY id DESC");
   //getData()
-  res.json(rows)
-})
+  res.json(rows);
+});
 
-app.post('/todos', async (req, res) => {
-  const { text } = req.body
+app.post("/kakaobank", async (req, res) => {
+  const { title } = req.body;
   // const {
   //   body: { text },
   // } = req
   await pool.query(
     `
-  INSERT INTO todo
+  INSERT INTO article
   SET reg_date = NOW(),
-  perform_date = '2022-10-18 07:00:00',
-  checked = 0,
-  text = ?;
+  body = ?;
   `,
-    [text]
-  )
-  // const [[rows]] = await pool.query(`
+    [title]
+  );
+  // const [[rows]] = await pool.query(
+  //   `
   // SELECT *
   // FROM todo
   // ORDER BY id
   // DESC LIMIT 1
-  // `)
-  /// 
+  // `
+  // )
+  ///
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM todo ORDER BY id DESC
+    FROM article ORDER BY id DESC
     `
-  ) 
-  res.json(newRows)
+  );
+  res.json(newRows);
   ///
-})
+});
 
-app.get('/todos/:id/', async (req, res) => {
+app.get("/kakaobank/:id/", async (req, res) => {
   //const id = req.params.id;
-  const { id } = req.params
+  const { id } = req.params;
 
   const [rows] = await pool.query(
     `
   SELECT *
-  FROM todo
+  FROM article
   WHERE id = ?
   `,
     [id]
-  )
+  );
   if (rows.length === 0) {
     res.status(404).json({
-      msg: 'not found',
-    })
-    return
+      msg: "not found",
+    });
+    return;
   }
 
-  res.json(rows[0])
-})
+  res.json(rows[0]);
+});
 
-/// 수정하기
-app.patch('/todos/:id', async (req, res) => {
-  const { id } = req.params
-  const { perform_date, text } = req.body
+/// 수정하기  // perform >> reg 수정함
+app.patch("/kakaobank/:id", async (req, res) => {
+  const { id } = req.params;
+  const { reg_date, title } = req.body;
 
   const [rows] = await pool.query(
     `
     SELECT *
-    FROM todo
+    FROM article
     WHERE id = ?
     `,
     [id]
-  )
+  );
 
   if (rows.length === 0) {
     res.status(404).json({
-      msg: 'not found',
-    })
+      msg: "not found",
+    });
   }
 
-  if (!perform_date) {
-    res.status(400).json({
-      msg: 'perform_date required',
-    })
-    return
-  }
+  // if (!perform_date) {
+  //   res.status(400).json({
+  //     msg: 'perform_date required',
+  //   })
+  //   return
+  // }
 
-  if (!text) {
+  if (!title) {
     res.status(400).json({
-      msg: 'text required',
-    })
-    return
+      msg: "text required",
+    });
+    return;
   }
 
   const [rs] = await pool.query(
     `
-    UPDATE todo
-    SET perform_date = ?,
-    text = ?
+    UPDATE article
+    SET reg_date = ?,
+    title = ?
     WHERE id = ?
     `,
-    [perform_date, text, id]
-  )
-
-  const [newRows] = await pool.query(
-    `
-    SELECT *
-    FROM todo ORDER BY id DESC
-    `
-  ) 
-  res.json(newRows)
-})
-
-/// Drag & Drop
-app.patch('/todos/swap/:id', async (req, res) => {
-  const { id } = req.params;
-  const { targetId } = req.body;
-  if (!id) {
-    res.status(400).json({
-      msg: "id required"
-    });
-    return;
-  }
-  if (!targetId) {
-    res.status(400).json({
-      msg: "id targetId"
-    }); 
-    return;
-  }
-
-  await pool.query(
-    `
-    UPDATE todo a INNER JOIN todo b ON a.id != b.id
-    SET a.reg_date = b.reg_date,
-    a.perform_date = b.perform_date,
-    a.checked = b.checked,
-    a.text = b.text
-    WHERE a.id IN (? , ?) AND b.id IN (? , ?)
-    `,
-    [targetId, id, targetId, id]
+    [reg_date, title, id]
   );
+
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM todo ORDER BY id DESC
+    FROM article ORDER BY id DESC
     `
   );
   res.json(newRows);
 });
 
+/// Drag & Drop
+// app.patch('/kakaobank/swap/:id', async (req, res) => {
+//   const { id } = req.params;
+//   const { targetId } = req.body;
+//   if (!id) {
+//     res.status(400).json({
+//       msg: "id required"
+//     });
+//     return;
+//   }
+//   if (!targetId) {
+//     res.status(400).json({
+//       msg: "id targetId"
+//     });
+//     return;
+//   }
 
-///
+//   await pool.query(
+//     `
+//     UPDATE kakaobank a INNER JOIN kakaobank b ON a.id != b.id
+//     SET a.reg_date = b.reg_date,
+//     a.text = b.text
+//     WHERE a.id IN (? , ?) AND b.id IN (? , ?)
+//     `,
+//     [targetId, id, targetId, id]
+//   );
+//   const [newRows] = await pool.query(
+//     `
+//     SELECT *
+//     FROM kakaobank ORDER BY id DESC
+//     `
+//   );
+//   res.json(newRows);
+// });
+
 /// 체크하기
-app.patch('/todos/abc/:id', async (req, res) => {
-  const { id } = req.params
-  const [[rows]] = await pool.query(
-    `
-    SELECT *
-  FROM todo
-  WHERE id = ?
-  `,
-    [id]
-  )
-  if (!rows) {
-    res.status(404).json({
-      msg: 'not found',
-    })
-    return
-  }
-  await pool.query(
-    `
-  UPDATE todo
-  SET checked = ?
-  WHERE id = ?
-  `,
+// app.patch('/kakaobank/abc/:id', async (req, res) => {
+//   const { id } = req.params
+//   const [[rows]] = await pool.query(
+//     `
+//     SELECT *
+//   FROM kakaobank
+//   WHERE id = ?
+//   `,
+//     [id]
+//   )
+//   if (!rows) {
+//     res.status(404).json({
+//       msg: 'not found',
+//     })
+//     return
+//   }
+//   await pool.query(
+//     `
+//   UPDATE kakaobank
+//   SET checked = ?
+//   WHERE id = ?
+//   `,
 
-    [!rows.checked, id]
-  )
-  ///
-  const [newRows] = await pool.query(
-    `
-    SELECT *
-    FROM todo ORDER BY id DESC
-    `
-  ) 
-  res.json(newRows)
-  ///
-})
+//     [!rows.checked, id]
+//   )
 
+//   const [newRows] = await pool.query(
+//     `
+//     SELECT *
+//     FROM kakaobank ORDER BY id DESC
+//     `
+//   )
+//   res.json(newRows)
+// })
 
 /// 삭제하기
-app.delete('/todos/:id', async (req, res) => {
-  const { id } = req.params
+app.delete("/kakaobank/:id", async (req, res) => {
+  const { id } = req.params;
 
-  const [[todoRow]] = await pool.query(
+  const [[kakaobankRow]] = await pool.query(
     `
     SELECT *
-    FROM todo
+    FROM article
     WHERE id = ?`,
     [id]
-  )
+  );
 
-  if (todoRow === undefined) {
+  if (kakaobankRow === undefined) {
     res.status(404).json({
-      msg: 'not found',
-    })
-    return
+      msg: "not found",
+    });
+    return;
   }
 
   await pool.query(
-    `DELETE FROM todo
+    `DELETE FROM article
     WHERE id = ?`,
     [id]
-  )
+  );
 
-    ///
+  ///
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM todo ORDER BY id DESC
+    FROM article ORDER BY id DESC
     `
-  ) 
-  res.json(newRows)
+  );
+  res.json(newRows);
   ///
-})
+});
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
