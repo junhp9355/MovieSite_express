@@ -44,16 +44,17 @@ app.get("/kakaobank", async (req, res) => {
 });
 
 app.post("/kakaobank", async (req, res) => {
-  const { title, body } = req.body;
-  // const { body } = req.body;
+  const { title } = req.body;
+  const { contents } = req.body;
+
   await pool.query(
     `
   INSERT INTO article
   SET reg_date = Now(),
   title = ?,
-  body = ?
+  contents = ?
   `,
-    [title, body]
+    [title, contents]
   );
   // const [[rows]] = await pool.query(
   //   `
@@ -74,7 +75,7 @@ app.post("/kakaobank", async (req, res) => {
   ///
 });
 
-app.get("/kakaobank/:id/", async (req, res) => {
+app.get("/kakaobank/:id", async (req, res) => {
   //const id = req.params.id;
   const { id } = req.params;
 
