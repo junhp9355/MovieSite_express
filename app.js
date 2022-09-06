@@ -76,12 +76,11 @@ app.post("/kakaobank", async (req, res) => {
 });
 
 app.get("/kakaobank/:id", async (req, res) => {
-  //const id = req.params.id;
   const { id } = req.params;
 
   const [rows] = await pool.query(
     `
-  SELECT *
+  SELECT id, title, contents
   FROM article
   WHERE id = ?
   `,
@@ -257,6 +256,7 @@ app.delete("/kakaobank/:id", async (req, res) => {
   ///
 });
 
+///
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
