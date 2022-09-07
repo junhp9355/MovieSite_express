@@ -99,7 +99,7 @@ app.get("/kakaobank/:id", async (req, res) => {
 /// 수정하기  // perform >> reg 수정함
 app.patch("/kakaobank/:id", async (req, res) => {
   const { id } = req.params;
-  const { reg_date, title } = req.body;
+  const { title, contents } = req.body;
 
   const [rows] = await pool.query(
     `
@@ -116,13 +116,6 @@ app.patch("/kakaobank/:id", async (req, res) => {
     });
   }
 
-  // if (!perform_date) {
-  //   res.status(400).json({
-  //     msg: 'perform_date required',
-  //   })
-  //   return
-  // }
-
   if (!title) {
     res.status(400).json({
       msg: "text required",
@@ -133,11 +126,11 @@ app.patch("/kakaobank/:id", async (req, res) => {
   const [rs] = await pool.query(
     `
     UPDATE article
-    SET reg_date = ?,
+    SET contents = ?,
     title = ?
     WHERE id = ?
     `,
-    [reg_date, title, id]
+    [contents, title, id]
   );
 
   const [newRows] = await pool.query(
