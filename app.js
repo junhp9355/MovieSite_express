@@ -80,7 +80,7 @@ app.get("/kakaobank/:id", async (req, res) => {
 
   const [rows] = await pool.query(
     `
-  SELECT id, title, contents
+  SELECT id, title, contents, reg_date
   FROM article
   WHERE id = ?
   `,
