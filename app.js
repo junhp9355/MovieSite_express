@@ -13,43 +13,43 @@ const pool = mysql.createPool({
   host: "localhost",
   user: "sbsst",
   password: "sbs123414",
-  database: "kakaobank",
+  database: "movie",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
 const getData = async () => {
-  const data = await axios.get("http://localhost:3000/kakaobank");
+  const data = await axios.get("http://localhost:3000/movie");
 };
 
-app.get("/kakaobank/:id/:contentId", async (req, res) => {
+app.get("/movie/:id/:contentId", async (req, res) => {
   // params 여러개 받기
   const data = {
-    kakaobank: {
+    movie: {
       id: req.params.id,
       contentId: req.params.contentId,
     },
   };
 
   const {
-    kakaobank: { id, contentId },
+    movie: { id, contentId },
   } = data;
 });
 
-app.get("/kakaobank", async (req, res) => {
-  const [rows] = await pool.query("SELECT * FROM article ORDER BY id DESC");
+app.get("/movie", async (req, res) => {
+  const [rows] = await pool.query("SELECT * FROM movieinfo ORDER BY id DESC");
   //getData()
   res.json(rows);
 });
 
-app.post("/kakaobank", async (req, res) => {
+app.post("/movie", async (req, res) => {
   const { title } = req.body;
   const { contents } = req.body;
 
   await pool.query(
     `
-  INSERT INTO article
+  INSERT INTO movieinfo
   SET reg_date = Now(),
   title = ?,
   contents = ?
@@ -68,20 +68,20 @@ app.post("/kakaobank", async (req, res) => {
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM article ORDER BY id DESC
+    FROM movieinfo ORDER BY id DESC
     `
   );
   res.json(newRows);
   ///
 });
 
-app.get("/kakaobank/:id", async (req, res) => {
+app.get("/movie/:id", async (req, res) => {
   const { id } = req.params;
 
   const [rows] = await pool.query(
     `
   SELECT id, title, contents, reg_date
-  FROM article
+  FROM movieinfo
   WHERE id = ?
   `,
     [id]
@@ -97,14 +97,14 @@ app.get("/kakaobank/:id", async (req, res) => {
 });
 
 /// 수정하기  // perform >> reg 수정함
-app.patch("/kakaobank/:id", async (req, res) => {
+app.patch("/movie/:id", async (req, res) => {
   const { id } = req.params;
   const { title, contents } = req.body;
 
   const [rows] = await pool.query(
     `
     SELECT *
-    FROM article
+    FROM movieinfo
     WHERE id = ?
     `,
     [id]
@@ -125,7 +125,7 @@ app.patch("/kakaobank/:id", async (req, res) => {
 
   const [rs] = await pool.query(
     `
-    UPDATE article
+    UPDATE movieinfo
     SET contents = ?,
     title = ?
     WHERE id = ?
@@ -136,7 +136,7 @@ app.patch("/kakaobank/:id", async (req, res) => {
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM article ORDER BY id DESC
+    FROM movieinfo ORDER BY id DESC
     `
   );
   res.json(newRows);
@@ -214,13 +214,13 @@ app.patch("/kakaobank/:id", async (req, res) => {
 // })
 
 /// 삭제하기
-app.delete("/kakaobank/:id", async (req, res) => {
+app.delete("/movie/:id", async (req, res) => {
   const { id } = req.params;
 
   const [[kakaobankRow]] = await pool.query(
     `
     SELECT *
-    FROM article
+    FROM movieinfo
     WHERE id = ?`,
     [id]
   );
@@ -233,7 +233,7 @@ app.delete("/kakaobank/:id", async (req, res) => {
   }
 
   await pool.query(
-    `DELETE FROM article
+    `DELETE FROM movieinfo
     WHERE id = ?`,
     [id]
   );
@@ -242,7 +242,7 @@ app.delete("/kakaobank/:id", async (req, res) => {
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM article ORDER BY id DESC
+    FROM movieinfo ORDER BY id DESC
     `
   );
   res.json(newRows);
