@@ -80,9 +80,30 @@ app.get("/movie/:id", async (req, res) => {
 
   const [rows] = await pool.query(
     `
-  SELECT id, title, contents, reg_date
+  SELECT *
   FROM movieinfo
   WHERE id = ?
+  `,
+    [id]
+  );
+  if (rows.length === 0) {
+    res.status(404).json({
+      msg: "not found",
+    });
+    return;
+  }
+
+  res.json(rows[0]);
+});
+
+app.get("/movie/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const [rows] = await pool.query(
+    `
+  SELECT *
+  FROM movieinfo
+  WHERE title = ?
   `,
     [id]
   );
