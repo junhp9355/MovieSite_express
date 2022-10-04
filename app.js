@@ -43,36 +43,65 @@ app.get("/movie", async (req, res) => {
   res.json(rows);
 });
 
-app.post("/movie", async (req, res) => {
+app.get("/movielike", async (req, res) => {
+  const [rows] = await pool.query("SELECT * FROM movielike ORDER BY id DESC");
+  //getData()
+  res.json(rows);
+});
+
+app.post("/movielike/:id", async (req, res) => {
+  const { id } = req.params;
   const { title } = req.body;
-  const { contents } = req.body;
+  const { grade } = req.body;
+  const { actor } = req.body;
+  const { content } = req.body;
+  const { address } = req.body;
+  const { years } = req.body;
+  const { age } = req.body;
+  const { genre } = req.body;
+  const { logo } = req.body;
+  const { backimg } = req.body;
+  const { video } = req.body;
 
   await pool.query(
     `
-  INSERT INTO movieinfo
-  SET reg_date = Now(),
-  title = ?,
-  contents = ?
+    INSERT INTO movielike
+    SET
+    title = ?,
+    grade = ?,
+    actor = ?,
+    content = ?,
+    address = ?,
+    years = ?,
+    age = ?,
+    genre = ?,
+    logo = ?,
+    backimg = ?,
+    video = ?
   `,
-    [title, contents]
+    [
+      id,
+      title,
+      grade,
+      actor,
+      content,
+      address,
+      years,
+      age,
+      genre,
+      logo,
+      backimg,
+      video,
+    ]
   );
-  // const [[rows]] = await pool.query(
-  //   `
-  // SELECT *
-  // FROM todo
-  // ORDER BY id
-  // DESC LIMIT 1
-  // `
-  // )
-  ///
+
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM movieinfo ORDER BY id DESC
+    FROM movielike ORDER BY id DESC
     `
   );
   res.json(newRows);
-  ///
 });
 
 app.get("/movie/:id", async (req, res) => {
@@ -235,13 +264,13 @@ app.patch("/movie/:id", async (req, res) => {
 // })
 
 /// 삭제하기
-app.delete("/movie/:id", async (req, res) => {
+app.delete("/movielike/:id", async (req, res) => {
   const { id } = req.params;
 
   const [[kakaobankRow]] = await pool.query(
     `
     SELECT *
-    FROM movieinfo
+    FROM movielike
     WHERE id = ?`,
     [id]
   );
@@ -254,7 +283,7 @@ app.delete("/movie/:id", async (req, res) => {
   }
 
   await pool.query(
-    `DELETE FROM movieinfo
+    `DELETE FROM movielike
     WHERE id = ?`,
     [id]
   );
@@ -263,7 +292,7 @@ app.delete("/movie/:id", async (req, res) => {
   const [newRows] = await pool.query(
     `
     SELECT *
-    FROM movieinfo ORDER BY id DESC
+    FROM movielike ORDER BY id DESC
     `
   );
   res.json(newRows);
